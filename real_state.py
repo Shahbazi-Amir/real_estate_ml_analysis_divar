@@ -426,3 +426,74 @@ plt.xlabel("Error in Rent Prediction (Million Tomans)")
 plt.ylabel("Frequency")
 plt.grid(True)
 plt.show()
+
+
+#20
+
+import lightgbm as lgb
+import numpy as np
+from sklearn.metrics import mean_squared_error
+from math import sqrt
+
+# فرض می‌کنیم X_train و y_train و X_test و y_test آماده‌ان
+# فقط دو ویژگی نسبت رهن و اجاره انتخاب شده‌اند
+
+# تعریف دیتاست LightGBM
+lgb_train = lgb.Dataset(X_train, y_train)
+
+# تنظیمات مدل با خاموش کردن هشدارها
+params = {
+    'objective': 'regression',
+    'verbosity': -1,  # حذف هشدارها
+    'boosting_type': 'gbdt',
+    'random_state': 42,
+    'num_leaves': 31,
+    'learning_rate': 0.05,
+    'n_estimators': 100
+}
+
+# آموزش مدل
+model = lgb.train(params, lgb_train)
+
+# پیش‌بینی روی داده تست
+y_pred = model.predict(X_test)
+
+# محاسبه RMSE
+rmse = sqrt(mean_squared_error(y_test, y_pred))
+print(f'RMSE (LightGBM): {rmse}')
+
+
+#21
+
+import xgboost as xgb
+from sklearn.metrics import mean_squared_error
+from math import sqrt
+
+# فرض می‌کنیم X_train, y_train, X_test, y_test آماده‌ان و فقط دو ویژگی نسبت رهن و اجاره انتخاب شده‌اند
+
+# ساخت دیتاست XGBoost
+dtrain = xgb.DMatrix(X_train, label=y_train)
+dtest = xgb.DMatrix(X_test, label=y_test)
+
+# تنظیمات مدل با غیرفعال کردن هشدارها
+params = {
+    'objective': 'reg:squarederror',
+    'eval_metric': 'rmse',
+    'verbosity': 0,  # حذف هشدارها
+    'seed': 42,
+    'max_depth': 6,
+    'eta': 0.1,
+    'nthread': 4
+}
+
+num_round = 100
+
+# آموزش مدل
+model = xgb.train(params, dtrain, num_round)
+
+# پیش‌بینی روی داده تست
+y_pred = model.predict(dtest)
+
+# محاسبه RMSE
+rmse = sqrt(mean_squared_error(y_test, y_pred))
+print(f'RMSE (XGBoost): {rmse}')
